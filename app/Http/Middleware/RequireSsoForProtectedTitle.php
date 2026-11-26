@@ -20,6 +20,26 @@ class RequireSsoForProtectedTitle
          *
          * No modifiques el controlador, las rutas ni los modelos.
          */
+        $title = $request->route('title');
+        $user = $request->user('sanctum');
+        if (!$title) {
+            return abort(404);
+        }
+
+        if (!$title->requires_sso) {
+            return $next($request);
+        }
+
+        if ($user) {
+            return $next($request);
+        }
+
+        if ($title->requires_sso && !$request->user('sanctum')) {
+            return response()->json([
+                'code' => 'SSO_REQUIRED',
+                'message' => 'Authentication is required to access this title.',
+            ], 401);
+        }
 
         return $next($request);
     }
