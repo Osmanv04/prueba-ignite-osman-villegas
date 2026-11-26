@@ -27,8 +27,33 @@ Explica:
 - si es posible utilizar Laravel sin conocer PHP y por qué.
 
 RESPUESTA:
+1. ¿Qué es PHP? Es un lenguaje de programación de código abierto, con tipado dinámico (por defecto no es necesario declarar el tipo de dato de una variable),
+aunque en las últimas versiones del lenguaje tiene de manera opcional definiciones de tipo.
+Es un lenguaje interpretado de servidor ya que su ejecucion se realiza en el servidor web antes de mostrar el 
+resultado final al usuario.
 
+2. ¿Qué es laravel? Es un framework open source para PHP diseñado bajo el patrón
+Modelo-Vista-Controlador(MVC) con el fin de facilitar el desarrollo web, proporcionando
+un conjunto de herramientas dentro de su propio ecosistema.
 
+3. ¿Qué proporciona Laravel sobre PHP? Siendo PHP la base de Laravel, éste proporciona una arquitectura modular y estructurada. Permitiendo así  
+abstraer funcionalidades y tareas repeptitivas que con PHP puro se tendrían que hacer desde cero.
+
+4. Al menos cuatro funcionalidades propias de Laravel
+    4.1. Su propio ORM(Object-Relational Mapping) llamado Eloquent que permite mapear la base de datos, definir sus relaciones y manejar las tablas de la
+    base de datos como código PHP.
+    4.2. Motor de plantillas Blade, permite combinar código HTML y PHP en un mismo archivo para así compilarse en el mismo PHP
+    4.3. La consola de comandos Artisan, permite generar código base (modelos, migraciones, controladores, etc)
+    4.4. Procesamiento HTTP y filtrado a través de los Middleware que permite filtrar y autenticar peticiones enviadas a los controladores.
+
+5. Un caso en el que usaría PHP sin framework, lo usaría en el caso de ejecución de scripts para correr en consola de comandos del SO 
+así como para el desarrollo de plugins en CMS como Wordpress
+
+6. Un caso en el que elegirías Laravel, para creación de API's o aplicaciones web un poco más complejas y que puedan escalarse de una forma más sencilla
+
+7. ¿Es posible utilizar Laravel sin conocer PHP y por qué? No es posible usar laravel sin tener un conocimiento previo de PHP porque si bien Laravel proporciona 
+una capa de abstracción, tood está hecho con PHP y el desarrollo de la aplicación se hace es con PHP (modelos, controladores, rutas). No se debe ser un experto en PHP
+pero sí se deben tener conocimientos base de PHP y de programación orientada a objetos.
 
 ===============================================================================
 PREGUNTA 2 — ESTRUCTURAS DE DATOS
@@ -49,6 +74,39 @@ Para cada caso explica:
 - una alternativa y por qué sería mejor o peor.
 
 RESPUESTA:
+
+1. Procesar solicitudes en el orden en que llegaron.
+    La estructura que se utilizaría es una COLA, ya que ésta usa el principio FIFO (first in, first out)
+    osea primer elemento que entra, primero que sale. Tiene dos funciones principales "encolar" y "desencolar"
+    que son las encargadas de insertar y eliminar elementos bajo el principio FIFO
+    Tiene un orden de ejecucion constante O(1) para "encolar" y "desencolar" y O(n) para realizar búsquedas
+    La variante podria ser una lista simple enlazada pero no seria una mejor alternativa ya que este tiene un 
+    orden de ejecucion n O(n) y como la lista trabaja con punteros guardar un nuevo elemento representaria recorrer TODA
+    la lista nuevamente.
+2. Implementar la función "deshacer" de un editor.
+    La estructura que usaría es una PILA, ya que ésta usa el principio LIFO (last in, first out) osea el último
+    elemento que se ingresó será el primero en salir. Tiene dos funciones principales "push" para insertar elementos y "pop"
+    para desapilar elementos. Tiene un orden de ejecucion constante O(1) para "push" y "pop" y O(n) para realizar búsquedas
+    Una variante interesante podría ser una lista doblemente enlazada ya que esta posee dos nodos uno previo y uno siguiente y permitiría
+    una búsqueda en ambas direcciones tanto para atrás como para adelante pero como consumiría mayor cantidad de memoria porque tendría que almacenar dos nodos
+    así que en cuanto a rendimiento sería peor.
+
+3. Buscar rápidamente un usuario mediante un identificador único.
+    La estructura a utilizar sería una tabla Hash o Diccionario, ya que cada registro de usuario se guarda y vincula a un identificador único
+    siendo éste su clave y como la gran particularidad de la tabla hash es que tiene una función matemática que permite acceder de forma directa a la 
+    posición del elemento en arreglo.
+    El orden de ejecución de la tabla hash es de O(1) tanto para buscar, eliminar y agregar
+    La variante a utilizar acá sería un árbol binario balanceado, ya que se mantendrían las claves ordenadas y las búsquedas serían más eficientes.
+
+4. Representar las conexiones entre usuarios de una red social.
+    La estructura a utilizar sería un grafo, ya que estos son estructuras de datos compuestos de nodos y vértices
+    y también aristas las cuales pueden ser dirigidas o no dirigidas, estas se pueden representar con una matriz de adyacencia 
+    o una lista de adyacencia. Ésta es la estructura que de por sí se suelen usar en las redes sociales.
+    Tiene un orden de ejecución para insertar aristas y vértices de O(1) pero para búsquedas implica un O(grado(v)) dependiendo del
+    grado del vértice.
+
+    Quizá una alternativa pueda ser una tabla hash pero de set o sea de conjuntos ya que permitiría verificar relaciones en tiempo constante
+    o sea un orden de ejecucion O(1) pero igualmente dependería de la cantidad de datos ya que esta estructura consume más memoria
 
 
 
@@ -99,6 +157,62 @@ Explica:
 - cómo harías que funcione correctamente con Unicode y acentos.
 
 RESPUESTA:
+
+function countWords(string $text): array
+{
+    if(trim($text) === '') {
+        return [];
+    }
+
+    $text_lower = mb_strtolower($text, 'UTF-8');
+    $words = preg_split('/[^\p{L}\p{N}]+/u', $text_lower, -1, PREG_SPLIT_NO_EMPTY);
+    $incidences = array_count_values($words);
+
+    uksort($incidences, function (string $a, string $b) use ($incidences): int {
+        if ($incidences[$a] !== $incidences[$b]) {
+            return $incidences[$b] <=> $incidences[$a];
+        }
+        return strcmp($a, $b);
+    });
+    return $incidences;
+}
+
+$resultado = countWords('PHP es útil. Laravel usa PHP; PHP és un lenguaje.');
+
+echo '<pre>';
+print_r($resultado);
+echo '</pre>';
+
+- Funciones PHP
+    * mb_strtolower: es una función para convertir el texto en minúsculas.Se pudo utilizar 
+    strtolower pero entonces las vocales mayúsculas no las iba a tomar en cuenta al momento
+    de pasarla a minúsculas y luego no se tomarían en cuenta para el conteo.
+    
+    * preg_split: recibe como parámetros una expresión regular que separa el texto si encuentra algo 
+    que no es una letra o un numero, además que indica que el patrón debe interpretar el texto como UTF-8
+    otro parámetro que recibe es el texto y una bandera que le indica al método que ignore cual espacio o fragmento
+    vacío resultante.
+    * array_count_values: cuenta la cantidad de veces que aparece cada elemento y crea el arreglo asociativo
+
+    * uksort: ordena el arreglo asociativo  funciones anónimas comparando de mayor a menor
+    y en caso de empate usa el método strcmp() para ordenarlo por orden alfabético.
+    * print_r: imprime el arreglo resultante en pantalla.
+
+- Cómo se manejaron la puntuación y los espacios
+    * Con la expresión regular en el preg_split /[^\\p{L}\\p{N}]+/u donde \p{L} que permite la 
+    coincidencia con cualquier letra en cualquier idioma y \p{N} permite la coincidencia con cualquier
+    número y el símbolo de ^ selecciona cualquier conjuto de caracteres que no sean letras ni números
+- ¿Qué sucede si el texto está vacío?
+    Al inicio de la función se hace esta validación con el if(trim($text) === '') {
+        return [];
+    } el cual simplemente pregunta si el texto viene vacío de ser así solo retorna un arreglo vacío.
+
+- ¿Cómo haría que funcione correctamente con Unicode y acentos?
+    Si quiero que ignore los acentos y lo tome como igual con respecto a las que no tienen entonces
+    tendría que normalizar el texto pero para esto debo tener una extensión habilitada. Para el caso de Unicode 
+    ya está implementado con el mb_strtolower para usarla se debe habilitar la extensión mbstring dentro del 
+    php.ini
+
 
 
 
@@ -158,6 +272,33 @@ Explica:
 
 RESPUESTA:
 
+SELECT
+    u.id AS user_id,
+    u.name,
+    COUNT(o.id) AS approved_order_count,
+    COALESCE(SUM(o.total)) AS total_spent
+FROM users u
+LEFT JOIN orders o
+    ON u.id = o.user_id
+    AND o.status = 'APPROVED'
+    AND o.created_at >= CURRENT_TIMESTAMP - INTERVAL '30 days'
+GROUP BY u.id, u.name
+ORDER BY total_spent DESC;
+
+- Se utilizó LEFT JOIN ya que la tarea exigía que se tomaran en cuenta todos los usuarios
+con o sin compras y ésta cláusula tomaría en cuenta las filas de la tabla a la izquierda en
+este caso users
+
+- Por qué los filtros de estado y fecha deben colocarse en esa cláusula, en este caso la cláusula ON
+setea que filas de la tabla derecha (orders) se unen a la tabla de la izquierda (users)
+
+- COALESCE, esta función lo que hace es evaluar un conjunto de parámetros y devuelve el primer valor que no tenga 
+valor NULL en este caso funciona porque si los usuarios no tienen compra cuando haga la suma retornaria null, pero
+con el COALESCE retorna cero.
+
+- ¿Qué sucedería si los filtros se colocaran directamente en la cláusula WHERE? Si se usara el WHERE los usuario sin 
+órdenes serían null y por lo tanto los descartaría al momento de mostrar los resultados y lo que se quiere es mostrar
+todos los usuarios.
 
 
 
@@ -188,6 +329,44 @@ Incluye:
 
 RESPUESTA:
 
+- Las sentencias CREATE INDEX:
+    -- Indice parcial compuesto
+    CREATE INDEX index_orders_user_approved_created 
+    ON orders (user_id, created_at DESC) WHERE status = 'APPROVED';
+
+    -- Indice compuesto completo
+
+    CREATE INDEX index_orders_user_status_created
+    ON orders (user_id, created_at DESC);
+
+- El orden de las columnas: sería el siguiente
+    1. user_id
+    2. created_at DESC
+
+- Indice completo o parcial, de acuerdo a las propuestas pues dependería de los siguiente:
+    * Si la consulta busca siempre los pedidos 'APPROVED' el índice parcial sería la opción más adecuada,
+    ya que tiene menor tamaño en memoria además de un mejor rendimiento en caché.
+    * En cambio si la aplicación realiza consultas parecidas pero para los otros estados entonces
+    el índice completo se perfila como la opción más adecuada.
+
+- La mejor manera de comprobar si PostgreSQL ejecuta el índice sería con una consulta. Pero colocando
+EXPLAIN(ANALYZE,BUFFERS) el cual es la herramienta propia de PostgreSQL comprobar una consulta sin ejecutarla
+midiendo asi su comportamiento en tiempo real.
+
+ejemplo:
+EXPLAIN (ANALYZE, BUFFERS) 
+SELECT id, user_id, total, created_at 
+FROM orders WHERE user_id = 4321 
+AND status = 'APPROVED' 
+AND created_at >= '2026-11-01' 
+ORDER BY created_at DESC;
+
+- La principal desventaja de usar muchos índices sería el excesivo consumo de memoria y que cada vez que
+se haga un insert o un update PostgreSQL debe actualizar los índices que tiene esa tabla.
+
+- En qué situaciones PostgreSQL podría decidir no utilizar el índice
+    En tablas pequeñas que no tengan tanto flujo de registros, o si tenemos una consulta donde la cantidad
+    de filas que retorne es poca no hace falta crear índices.
 
 
 
@@ -220,7 +399,22 @@ Incluye:
 Puedes incluir un diagrama o un ejemplo de GitHub Actions.
 
 RESPUESTA:
+    - Diferencia entre integración continua, entrega continua y despliegue continuo
+        La diferencia radica es que en la integración continua mientras se está desarrollando
+        y haciendo push al repositorio éste ejecuta internamente compilación, análisis para así 
+        verificar si hay errores de forma temprana.
 
+        La entrega continua automatiza la aplicación y la empaqueta su despliegue a preproducción
+        o entorno de desarrollo.
+
+        Y el despliegue continuo automatiza el flujo sin intervención humana y si los cambios pasan
+        con éxito se despliega directa y automática al entorno de producción.
+    
+     - Qué debería suceder cuando una prueba falla.
+        * El proceso automático se bloquea para evitar que el código con errores continúe hacia otras fases
+        * Corregir el error en local y volver a hacer push para validar, aquí es importante que cada cambio O
+        cada commit que se realice sea pequeño para poder detectar posibles errores de forma mucho más rápida.
+     
 
 
 
@@ -248,7 +442,118 @@ Incluye ejemplos de:
 - un intento de acceso sin autenticación.
 
 RESPUESTA:
+La API HTTP funciona mediante una petición y una respuesta entre el cliente y el servidor
+donde el cliente en su petición incluye el verbo (GET,PUT,POST,DELETE,PATCH), el endpoint,
+las cabeceras y el body (si así lo requiere). 
+Luego de eso el servidor recibe esa petición la procesa ejecuta lo que deba ejecutar (inserción, modificación o consulta)
+y luego envía una respuesta de regreso con un código y la data puede ser un JSON o un XML
 
+- Diferencias entre GET, POST, PUT, PATCH y DELETE
+    * GET: se encarga de obtener la información del recurso solicitado, es un método de solo lectura
+    por lo tanto no altera el estado del servidor.
+    * POST: se encarga de crear un nuevo recurso o procesar información para el servidor (ej: el login de una aplicación)
+    * PUT: se encarga de realizar una modificación completa del recurso solicitado
+    * PATCH: se encarga de realizar una modificación parcial del recurso solicitado
+    * DELETE: elimina el recurso que se especifique en el endpoint
+- Qué significa que una operación sea idempotente
+    Significa que sin importar las veces que se repita una petición ésta solo alterará el estado del servidor una 
+    sola vez por ejemplo las peticiones GET, PUT, DELETE son idempotentes.
+
+- Diferencia entre autenticación y autorización
+    La diferencia radica es que mientras la autenticación se encarga de verificar quién es el usuario,
+    la autorización se encarga de verificar qué tiene permitido hacer ese usuario que ya está verificado.
+
+- Diferencia entre los códigos 401 y 403
+    * La 401 indica que la petición/solicitud no tiene las credenciales ya sea porque el usuario no está logueado 
+    o su token de acceso está vencido.
+    * La 403 indica que si bien el usuario está autenticado no tiene los permisos necesarios para acceder a ese recurso.
+
+- Cuándo utilizarías 200, 201, 204, 400, 404, 409, 422 y 500
+    * 200: Cuando la petición fue creada con éxito por ej en una petición GET 
+    * 201: Cuando la peticón ha tenido éxito y se ha creado un nuevo recurso ej. una petición POST
+    * 204: Este se utiliza cuando la petición tuvo éxito pero el servidor no retorna nada, ej una petición DELETE
+    * 400: Cuando el servidor no logra procesar la solicitud debido a un error ejemplo JSON mal formado o 
+    parámetros mal estrcuturados
+    * 404: El recurso que se solicita no existe
+    * 409: Cuando hay un conflicto un conflicto con el estado actual del servidor ejemplo registrar un correo existente
+    * 422: Ocurre cuando la petición está bien formada, pero hay errores de validación como cuando no se llenan valores requeridos.
+    * 500: Ocurre cuando hay un fallo inesperado no controlador por el servidor.
+
+- Qué información no debería exponerse en una respuesta de error
+    *Ni contraseñas, tokens o credenciales
+    *Rutas internas del servidor
+    *Consultas SQL crudas o nombres de tablas.
+
+- Cómo diseñarías una respuesta JSON consistente para errores.
+    La respuesta sería en formato JSON estandarizado de esta manera yo la uso por ejemplo:
+    {
+        "success": false,
+        "message": "Mensaje de error o descripción",
+        "code": codigo_error
+        "errors": {
+            "campo": [
+                "El campo es obligatorio."
+            ]
+        }
+    }
+    Aunque hay varias formas de estandarizar las respuestas recibidas desde el servidor
+- Solicitud exitosa:
+    *Petición:
+
+        POST /api/v1/usuarios 
+        HTTP/1.1 Host: my-app.com 
+        Content-Type: application/json 
+        Authorization: Bearer token_valido 
+        { 
+            "nombre": "osman Villegas", 
+            "email": "osmanv04@gmail.com" 
+        }
+    
+    * Respuesta:
+        HTTP/1.1 201 Created Content-Type: application/json 
+        { 
+            "id": "1", 
+            "nombre": 
+            "osman Villegas", 
+            "email": "osmanv04@gmail.com", 
+            "created_at": "2026-11-25T18:22:12Z" 
+        }
+
+- Un error de validación
+    * Petición
+        POST /api/v1/usuarios 
+        HTTP/1.1 Host: my-app.com 
+        Content-Type: application/json 
+        { 
+            "nombre": "", +
+            "email": "correo_invalido" 
+        }
+    * Respuesta:
+    {
+        "success": false,
+        "code": 422
+        "message": "La solicitud contiene datos inválidos",
+        "errors": {
+            "nombre": [
+               ampo nombre es obligatorio."
+            ],
+            "email": [
+             ión dees in corroo válida."
+            ]
+        }
+    }
+
+- Un intento de acceso sin autenticación.
+    * Petición:
+        GET /api/v1/pedidos 
+        HTTP/1.1 Host: my-app.com
+    * Respuesta:
+        {
+            "success": false,
+            "code": 401,
+            "message": "No autenticado. Debe iniciar sesión o proporcionar un token válido.",
+            "errors": null
+        }
 
 
 ===============================================================================
@@ -260,6 +565,17 @@ un ciclo de entrenamiento desde que la red recibe datos hasta que ajusta sus par
 Incluye qué papel cumplen la predicción, la función de pérdida y la retropropagación.
 
 RESPUESTA:
+Las RNA se entrenan ajustando sus parámetros internos usando un conjunto de datos de ejemplo
+ya que estos no se entrenan con con reglas fijas sino que ésta se va ajustando hasta ir obteniendo el 
+resultado deseado.
+
+Un ciclo de entrenamiento, va desde:
+    1. La recepción de los datos, en donde la información fluye para que cada neurona se multiplique esa data
+    por el peso y el sesgo
+    2. Cálculo de error, acá después de la predicción hay una función que compara la predicción con la respuesta desplegada
+    3. Distribución del error, acá se trata de mitigar el error hacia atrás 
+    4. Ajuste de parámetros, en esta parte el algoritmo optmiza y modifica los sesgos y los pesos buscando así reducir el margen de error
+
 
 
 ===============================================================================
@@ -275,6 +591,25 @@ Puedes usar un ejemplo breve, sin fórmulas.
 
 
 RESPUESTA:
+El PLN es una parte de inteligencia artificial que se enfoca en capacitar a las computadoras 
+para que puedan procesar, comprender e interpretar en lenguaje humano.
+
+La principal diferencia entre una tarea generativa, como redactar un resumen, de una tarea como clasificar el tema de un texto es que 
+la tarea que clasifica el texto analiza un texto de entrada y lo clasifica dentro de un conjunto ya definido de opciones sin generar
+texto. En la cambio la generativa a partir de una instrucción es capaz de producir nuevo texto.
+
+* Tokens: es la unidad mínima en la que se divide el texto o instrucción durante el procesamiento. Éste puede ser una palabra, un caracter 
+* Qué aprende un modelo de lenguaje durante su entrenamiento
+    A través de gran cantidad de data, el modelo aprende patrones sobre como conectar palabras, frases e ideas.
+* Cómo usa lo aprendido para generar texto
+    Funciona de manera autorregresiva. Con la instrucción inicial, el modelo calcula cuál es el siguiente token más probable,
+    lo añade a la secuencia y repite sucesivamente este ciclo para construir la respuesta completa.
+
+*  ¿Qué aportan los transformers y el mecanismo de atención?
+    Los transformers, permiten procesar de forma simultánea el texto en paralelo, añadiéndole rapidez al entrenamiento
+    Mientras que el mecanismo de atención, permite establecer conexiones directas entre términos lejanos a través de la
+    asignación de pesos a los tokens.
+
 
 
 
@@ -290,6 +625,42 @@ Menciona dos técnicas de prompting que aplicarías, explica para qué sirve cad
 breve de prompt para obtener un resumen con un formato definido.
 
 RESPUESTA:
+
+- Usaría un motor de ejecución local como Ollama, ya que permite ejecutar LLM's directamente en el hardware
+- El modelo a utilizar sería Qwen 2.5 7B para reducir el uso de memoria sin perder precisión
+- El modelo se ejecutaría de forma 100% de forma local en la computadora, aportando privacidad a los datos 
+procesados
+- En cuanto a limitaciones, memoria RAM ya que a medida que el texto procesado aumenta el consumo de memoria incrementa
+así como la velocidad de generación sería un poco más lenta.
+- Para procesar textos largos, se buscaría segmentar el texto en bloques diminutos así el modelo resumiría cada bloque
+individualmente y cada resumen pasaría a un prompt para generar un solo resultado.
+
+- Técnicas:
+    * In-Context Learning: consiste en dar ejemplos en el prompt para así guiar al modelo para que se adapte al estilo de respuesta
+    que se busca.
+    * Razonamiento Paso a Paso: Se le da instrucciones al modelo para que desglose el problema, reduciendo así errores lógicos y 
+    alucionaciones
+
+
+- Ejemplo de prompt:
+
+Eres un asistente experto en síntesis de información en español. 
+Sigue estos pasos antes de responder: 
+1. Lee el texto proporcionado y extrae en borrador las 3 ideas principales. 
+2. Basándote ÚNICAMENTE en esas ideas, redacta el resumen final. 
+
+FORMATO DE SALIDA REQUERIDO: 
+### Resumen Ejecutivo 
+[Escribe aquí un párrafo conciso de máximo 4 oraciones] 
+### Puntos Clave 
+- [Punto clave 1] 
+- [Punto clave 2] 
+- [Punto clave 3] 
+Texto a resumir: 
+""" 
+[Insertar texto del documento aquí] 
+"""
+
 
 
 
